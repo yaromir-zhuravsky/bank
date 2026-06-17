@@ -31,3 +31,6 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+#Ignore hidden configuration directory created by RubyMine
+.idea/*
+
