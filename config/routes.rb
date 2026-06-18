@@ -9,4 +9,8 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  post "operations/withdraw", to: "operations#withdraw"
+  post "operations/deposit", to: "operations#deposit"
+  post "operations/transfer", to: "operations#transfer"
 end
