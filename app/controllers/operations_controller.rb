@@ -24,69 +24,57 @@ class OperationsController < ApplicationController
 
   def withdraw
     result = WithdrawSchema.call(params.permit!.to_h)
+    return render json: { errors: result.errors.to_h }, status: :unprocessable_entity unless result.success?
 
-    if result.success?
-      operation_info = result.to_h[:operation]
+    operation_info = result.to_h[:operation]
+    amount = operation_info[:amount]
 
-      account = Account.find_by(number: operation_info[:from])
-      return render status: :not_found, json: {errors: {account: "not found"}}unless account.present?
+    account = Account.find_by(number: operation_info[:from])
+    return render status: :not_found, json: {errors: {account: "not found"}}unless account.present?
 
-      ActiveRecord::Base.transaction do
-        operation = Operation.create!
-        Transaction.create!(account_id: account.id, operation_id: operation.id, amount: -operation_info[:amount])
-        account.update!(balance: account.balance - operation_info[:amount])
-      rescue ActiveRecord::RecordInvalid => e
-        render json: { errors: e.record.errors }, status: :unprocessable_entity
-      end
-    else
-      render json: { errors: result.errors.to_h}, status: :unprocessable_entity
-    end
+    Operations::Withdraw.perform(account, amount)
+
+    head :ok
+
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { errors: e.record.errors }, status: :unprocessable_entity
   end
 
   def deposit
     result = DepositSchema.call(params.permit!.to_h)
+    return render json: { errors: result.errors.to_h }, status: :unprocessable_entity unless result.success?
 
-    if result.success?
-      operation_info = result.to_h[:operation]
+    operation_info = result.to_h[:operation]
+    amount = operation_info[:amount]
 
-      account = Account.find_by(number: operation_info[:to])
-      return render status: :not_found, json: {errors: {account: "not found"}} unless account.present?
+    account = Account.find_by(number: operation_info[:to])
+    return render status: :not_found, json: {errors: {account: "not found"}} unless account.present?
 
-      ActiveRecord::Base.transaction do
-        operation = Operation.create!
-        Transaction.create!(account_id: account.id, operation_id: operation.id, amount: operation_info[:amount])
-        account.update!(balance: account.balance + operation_info[:amount])
-      rescue ActiveRecord::RecordInvalid => e
-        render json: { errors: e.record.errors }, status: :unprocessable_entity
-      end
-    else
-      render json: { errors: result.errors.to_h }, status: :unprocessable_entity
-    end
+    Operations::Deposit.perform(account, amount)
+
+    head :ok
+
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { errors: e.record.errors }, status: :unprocessable_entity
   end
 
   def transfer
     result = TransferSchema.call(params.permit!.to_h)
+    return render json: { errors: result.errors.to_h }, status: :unprocessable_entity unless result.success?
 
-    if result.success?
-      operation_info = result.to_h[:operation]
+    operation_info = result.to_h[:operation]
+    amount = operation_info[:amount]
 
-      from_account = Account.find_by(number: operation_info[:from])
-      return render status: :not_found, json: {errors: {account: "not found"}} unless from_account.present?
-      to_account = Account.find_by(number: operation_info[:to])
-      return render status: :not_found, json: {errors: {account: "not found"}} unless to_account.present?
+    sender_account = Account.find_by(number: operation_info[:from])
+    return render status: :not_found, json: {errors: {account: "not found"}} unless sender_account.present?
+    receiver_account = Account.find_by(number: operation_info[:to])
+    return render status: :not_found, json: {errors: {account: "not found"}} unless receiver_account.present?
 
+    Operations::Transfer.perform(sender_account, receiver_account, amount)
 
-      ActiveRecord::Base.transaction do
-        operation = Operation.create!
-        Transaction.create!(account_id: from_account.id, operation_id: operation.id, amount: -operation_info[:amount])
-        from_account.update!(balance: from_account.balance - operation_info[:amount])
-        Transaction.create!(account_id: to_account.id, operation_id: operation.id, amount: operation_info[:amount])
-        to_account.update!(balance: to_account.balance + operation_info[:amount])
-      rescue ActiveRecord::RecordInvalid => e
-        render json: { errors: e.record.errors }, status: :unprocessable_entity
-      end
-    else
-      render json: { errors: result.errors.to_h }, status: :unprocessable_entity
-    end
+    head :ok
+
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { errors: e.record.errors }, status: :unprocessable_entity
   end
 end
