@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Account < ApplicationRecord
   enum :currency, {
     usd: "USD",
@@ -6,9 +8,9 @@ class Account < ApplicationRecord
   }
 
   belongs_to :customer
-  has_many :transactions
+  has_many :transactions, dependent: :restrict_with_error
 
-  validates :number, presence: true, uniqueness: true, format: {with: /\A[0-9]{16}\z/}
+  validates :number, presence: true, uniqueness: true, format: { with: /\A[0-9]{16}\z/ }
   validates :balance, presence: true
   validates :currency, presence: true
 end
