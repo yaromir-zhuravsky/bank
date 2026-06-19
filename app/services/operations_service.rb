@@ -13,6 +13,7 @@ module OperationsService
   class Withdraw
     def self.perform(account, amount)
       ActiveRecord::Base.transaction do
+        account.lock!
         operation = Operation.create!
         Transaction.create!(account_id: account.id, operation_id: operation.id, amount: -amount)
         account.deduct!(amount)
@@ -23,6 +24,7 @@ module OperationsService
   class Deposit
     def self.perform(account, amount)
       ActiveRecord::Base.transaction do
+        account.lock!
         operation = Operation.create!
         Transaction.create!(account_id: account.id, operation_id: operation.id, amount:)
         account.add!(amount)
