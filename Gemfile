@@ -53,6 +53,9 @@ group :development, :test do
   gem "strong_migrations"
 
   gem "dry-schema"
+
+  gem "dotenv", "~> 3.2"
 end
 
 gem "jwt", "~> 3.2"
+

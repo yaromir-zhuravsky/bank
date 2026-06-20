@@ -382,6 +382,7 @@ DEPENDENCIES
   brakeman
   bundler-audit
   debug
+  dotenv (~> 3.2)
   dry-schema
   image_processing (~> 1.2)
   jwt (~> 3.2)

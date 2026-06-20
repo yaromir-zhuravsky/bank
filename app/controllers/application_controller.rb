@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::API
-  include ActionController::Cookies
-
   before_action :authenticate_request
 
   class ParamsInvalid < StandardError
@@ -24,13 +22,12 @@ class ApplicationController < ActionController::API
 
   def authenticate_request
     access_token = request.headers["Authorization"]&.split(" ")&.[](1)
-    binding.irb
     if access_token.nil?
       render :unathorized unless access_token
       return
     end
-    binding.irb
-    TokensService::Decode.perform(access_token)
+
+    TokensService.decode!(access_token)
   end
 
   def current_user
