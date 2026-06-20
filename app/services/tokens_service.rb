@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class JwtService
+module TokensService
   JWT_SECRET = Rails.application.credentials.jwt_secret
 
   class Encode
