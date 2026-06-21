@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::API
+  include Rescuable
+
   before_action :authenticate_request
 
   class ParamsInvalid < StandardError
@@ -13,10 +15,6 @@ class ApplicationController < ActionController::API
     end
   end
 
-  rescue_from ActiveRecord::RecordInvalid, with: :record_invalid
-  rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
-  rescue_from ParamsInvalid, with: :params_invalid
-  rescue_from OperationsService::DifferentCurrencies, with: :different_currencies
 
   private
 
@@ -32,22 +30,6 @@ class ApplicationController < ActionController::API
 
   def current_user
     User.find_by(id: TokensService.decode(request.headers["Authorization"].split(" ")[1])["user_id"])
-  end
-
-  def record_invalid(error)
-    render json: { errors: error.record.errors }, status: :unprocessable_content
-  end
-
-  def record_not_found(error)
-    render json: { errors: "#{error.model.downcase} not found" }, status: :not_found
-  end
-
-  def params_invalid(error)
-    render json: { errors: error.errors }, status: :unprocessable_content
-  end
-
-  def different_currencies(error)
-    render json: { errors: error.errors }, status: :unprocessable_content
   end
 
   def validate_params!(schema)

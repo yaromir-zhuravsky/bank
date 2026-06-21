@@ -4,7 +4,8 @@ class AuthenticationController < ApplicationController
   skip_before_action :authenticate_request, only: [:login, :refresh]
 
   def login
-    authentication_info = validate_params!(AuthenticationSchema::Login)[:authentication]
+    validated_params = validate_params!(AuthenticationSchema::Logout)
+    authentication_info = validated_params[:authentication]
     user = User.find_by!(email: authentication_info[:email])
     if user.authenticate(authentication_info[:password])
       payload = { user_id: user.id }
@@ -16,7 +17,8 @@ class AuthenticationController < ApplicationController
   end
 
   def logout
-    authentication_info = validate_params!(AuthenticationSchema::Logout)[:authentication]
+    validated_params = validate_params!(AuthenticationSchema::Logout)
+    authentication_info = validated_params[:authentication]
     refresh_token = authentication_info[:refresh_token]
     if TokensService.revoked?(refresh_token)
       render status: :unauthorized
@@ -28,7 +30,8 @@ class AuthenticationController < ApplicationController
   end
 
   def refresh
-    authentication_info = validate_params!(AuthenticationSchema::Refresh)[:authentication]
+    validated_params = validate_params!(AuthenticationSchema::Logout)
+    authentication_info = validated_params[:authentication]
     refresh_token = authentication_info[:refresh_token]
     if TokensService.revoked?(refresh_token)
       render status: :unauthorized
