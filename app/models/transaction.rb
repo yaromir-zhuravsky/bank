@@ -2,7 +2,7 @@
 
 class Transaction < ApplicationRecord
   belongs_to :operation
-  has_one :account, dependent: :restrict_with_error
+  has_one :account, dependent: :destroy
 
   validates :amount, presence: true
 end

@@ -10,6 +10,34 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: citext; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION citext; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION citext IS 'data type for case-insensitive character strings';
+
+
+--
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -165,6 +193,41 @@ CREATE TABLE public.schema_migrations (
 
 
 --
+-- Name: sessions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sessions (
+    id bigint NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    user_id bigint NOT NULL,
+    uuid uuid NOT NULL,
+    current_refresh_jti character varying NOT NULL,
+    expires_at timestamp(6) without time zone NOT NULL,
+    revoked_at timestamp(6) without time zone
+);
+
+
+--
+-- Name: sessions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.sessions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sessions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.sessions_id_seq OWNED BY public.sessions.id;
+
+
+--
 -- Name: transactions; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -204,7 +267,10 @@ ALTER SEQUENCE public.transactions_id_seq OWNED BY public.transactions.id;
 CREATE TABLE public.users (
     id bigint CONSTRAINT users_id_not_null1 NOT NULL,
     created_at timestamp(6) without time zone CONSTRAINT users_created_at_not_null1 NOT NULL,
-    updated_at timestamp(6) without time zone CONSTRAINT users_updated_at_not_null1 NOT NULL
+    updated_at timestamp(6) without time zone CONSTRAINT users_updated_at_not_null1 NOT NULL,
+    password_digest character varying NOT NULL,
+    email public.citext NOT NULL,
+    uuid uuid NOT NULL
 );
 
 
@@ -253,6 +319,13 @@ ALTER TABLE ONLY public.customers ALTER COLUMN id SET DEFAULT nextval('public.cu
 --
 
 ALTER TABLE ONLY public.operations ALTER COLUMN id SET DEFAULT nextval('public.operations_id_seq'::regclass);
+
+
+--
+-- Name: sessions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions ALTER COLUMN id SET DEFAULT nextval('public.sessions_id_seq'::regclass);
 
 
 --
@@ -318,6 +391,14 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: transactions transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -355,6 +436,34 @@ CREATE UNIQUE INDEX index_customers_on_user_id ON public.customers USING btree (
 
 
 --
+-- Name: index_sessions_on_current_refresh_jti; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_sessions_on_current_refresh_jti ON public.sessions USING btree (current_refresh_jti);
+
+
+--
+-- Name: index_sessions_on_uuid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_sessions_on_uuid ON public.sessions USING btree (uuid);
+
+
+--
+-- Name: index_users_on_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_users_on_email ON public.users USING btree (email);
+
+
+--
+-- Name: index_users_on_uuid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_users_on_uuid ON public.users USING btree (uuid);
+
+
+--
 -- Name: transactions fk_rails_01f020e267; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -368,6 +477,14 @@ ALTER TABLE ONLY public.transactions
 
 ALTER TABLE ONLY public.admins
     ADD CONSTRAINT fk_rails_378b9734e4 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: sessions fk_rails_758836b4f0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT fk_rails_758836b4f0 FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -401,6 +518,10 @@ ALTER TABLE ONLY public.accounts
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260623103349'),
+('20260622165556'),
+('20260620070158'),
+('20260619163228'),
 ('20260617144908'),
 ('20260617112547'),
 ('20260617112149'),

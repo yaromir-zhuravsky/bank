@@ -2,7 +2,7 @@
 
 class Customer < ApplicationRecord
   belongs_to :user
-  has_one :account, dependent: :restrict_with_error
+  has_one :account, dependent: :destroy
 
   validates :firstname, presence: true
   validates :lastname, presence: true

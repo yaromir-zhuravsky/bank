@@ -8,7 +8,7 @@ class Account < ApplicationRecord
   }
 
   belongs_to :customer
-  has_many :transactions, dependent: :restrict_with_error
+  has_many :transactions, dependent: :destroy
 
   validates :number, presence: true, uniqueness: true, format: { with: /\A[0-9]{16}\z/ }
   validates :balance, presence: true, numericality: { greater_than_or_equal_to: 0 }
