@@ -23,7 +23,6 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
-
   # Log to STDOUT with the current request id as a default log tag.
   config.log_tags = [:request_id]
   config.logger   = ActiveSupport::TaggedLogging.logger($stdout)
@@ -42,5 +41,4 @@ Rails.application.configure do
 
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [:id]
-
 end
