@@ -1,0 +1,15 @@
+services:
+  bank_backend:
+    image: bank_backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database
+    environment:
+      - BANK_DATABASE_URL=postgres://postgres@database:5432
+  database:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust

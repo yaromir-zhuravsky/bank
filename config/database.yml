@@ -12,7 +12,6 @@ test:
   <<: *default
   database: bank_test
 
-#
 production:
-    <<: *default
-    database: bank_production
+  <<: *default
+  database: bank_production
