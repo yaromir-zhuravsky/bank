@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 
 bin/rails db:create
 bin/rails db:migrate

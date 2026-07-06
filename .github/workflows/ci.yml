@@ -1,4 +1,4 @@
-name: "Ruby on Rails CI"
+name: "CI"
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
           POSTGRES_HOST_AUTH_METHOD: trust
     env:
       RAILS_ENV: test
-      BANK_DATABASE_URL: ${{ secrets.BANK_DATABASE_URL}}
+      BANK_DATABASE_URL: postgres://postgres@localhost:5432/bank_test
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
