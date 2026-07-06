@@ -1,12 +1,14 @@
 services:
   bank_backend:
-    image: bank_backend
+    image: ghcr.io/yaromir-zhuravsky/bank:latest
     ports:
       - "3000:3000"
     depends_on:
       - database
     environment:
-      - BANK_DATABASE_URL=postgres://postgres@database:5432
+      - BANK_DATABASE_URL=postgresql://postgres:KZQMsnFxxQFJ9hG!9rKE@db.rpuhjiewcjeclqvkdbib.supabase.co:5432/postgres
+      - SECRET_KEY_BASE=2ef0e9ea396d5a92cad0d3c783bd4563e805f697e63e640149b3f8ed9cb30cb0378521e9fa27514c967b60ad13dde7c54c83c115980a3b561f68ba6a000aed67
+      - JWT_SECRET=c62dad1d414cd96b7aa2089decc18edd24a78650dde4ecd0218a0d38a42b7782fd70d6dc00665035f65b7897b7fe340ad813387de8fe64b712f2856b70769b80
   database:
     image: postgres
     ports:
