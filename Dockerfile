@@ -7,7 +7,7 @@ RUN apk add --no-cache \
       postgresql-dev \
       postgresql-client \
       yaml-dev \
-      tzdata \
+      tzdata
 
 ENV RAILS_ENV=production
 ENV BUNDLE_WITHOUT=development:test
