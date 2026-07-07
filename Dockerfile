@@ -9,8 +9,10 @@ RUN apk add --no-cache \
       yaml-dev \
       tzdata
 
-COPY Gemfile Gemfile.lock ./
+ENV RAILS_ENV=production
+ENV BUNDLE_WITHOUT=development:test
 
+COPY Gemfile Gemfile.lock ./
 
 RUN bundle install
 

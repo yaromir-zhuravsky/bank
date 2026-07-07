@@ -3,27 +3,37 @@ name: "CD"
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
   packages: write
 
+concurrency:
+  group: production
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-24.04
-    env:
-      KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-      SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      BANK_DATABASE_URL: ${{ secrets.BANK_DATABASE_URL }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - uses: actions/checkout@v7
       - uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
       - uses: docker/setup-buildx-action@v3
       - uses: crazy-max/ghaction-github-runtime@v3
       - run: bundle exec kamal deploy
+        env:
+          KAMAL_HOST: ${{ vars.KAMAL_HOST }}
+          KAMAL_IMAGE: ${{ vars.KAMAL_IMAGE }}
+          KAMAL_REGISTRY_SERVER: ${{ vars.KAMAL_REGISTRY_SERVER || 'ghcr.io' }}
+          KAMAL_REGISTRY_USERNAME: ${{ secrets.KAMAL_REGISTRY_USERNAME }}
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          KAMAL_SERVER_IP: ${{ vars.KAMAL_SERVER_IP }}
+          KAMAL_SSH_PRIVATE_KEY: ${{ secrets.KAMAL_SSH_PRIVATE_KEY }}
+          KAMAL_SSH_USER: ${{ vars.KAMAL_SSH_USER || 'root' }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          BANK_DATABASE_URL: ${{ secrets.BANK_DATABASE_URL }}

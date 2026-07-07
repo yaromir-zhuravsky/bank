@@ -1,92 +1,34 @@
-# Name of your application. Used to uniquely configure containers.
 service: bank
 
-# Name of the container image.
-image: yaromir-zhuravsky/bank
+image: <%= ENV.fetch("KAMAL_IMAGE") %>
 
-# Deploy to these servers.
 servers:
   web:
-    - 204.168.229.11
-  # job:
-  #   hosts:
-  #     - 192.168.0.1
-  #   cmd: bin/jobs
+    - <%= ENV.fetch("KAMAL_SERVER_IP") %>
 
-# Credentials for your image host.
+proxy:
+  host: <%= ENV.fetch("KAMAL_HOST") %>
+  app_port: 3000
+  ssl: true
+
 registry:
-  server: ghcr.io
-  username: yaromir-zhuravsky
+  server: <%= ENV.fetch("KAMAL_REGISTRY_SERVER", "ghcr.io") %>
+  username: <%= ENV.fetch("KAMAL_REGISTRY_USERNAME") %>
   password:
     - KAMAL_REGISTRY_PASSWORD
 
-# Configure builder setup.
 builder:
   arch: amd64
   cache:
     type: gha
 
 env:
-  clear:
-    RAILS_ENV: production
-    BUNDLE_WITHOUT: development:test
   secret:
     - BANK_DATABASE_URL
     - SECRET_KEY_BASE
     - JWT_SECRET
 
-proxy:
-  ssl: true
-  host: api.zhuravsky.dev
-  app_port: 3000
-# Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
-# "bin/kamal app logs -r job" will tail logs from the first server in the job section.
-#
-# aliases:
-#   shell: app exec --interactive --reuse "bash"
-
-# Use a different ssh user than root
-#
-# ssh:
-#   user: app
-
-# Use a persistent storage volume.
-#
-# volumes:
-#   - "app_storage:/app/storage"
-
-# Bridge fingerprinted assets, like JS and CSS, between versions to avoid
-# hitting 404 on in-flight requests. Combines all files from new and old
-# version inside the asset_path.
-#
-# asset_path: /app/public/assets
-
-# Configure rolling deploys by setting a wait time between batches of restarts.
-#
-# boot:
-#   limit: 10 # Can also specify as a percentage of total hosts, such as "25%"
-#   wait: 2
-
-# Use accessory services (secrets come from .kamal/secrets).
-#
-# accessories:
-#   db:
-#     image: mysql:8.0
-#     host: 192.168.0.2
-#     port: 3306
-#     env:
-#       clear:
-#         MYSQL_ROOT_HOST: '%'
-#       secret:
-#         - MYSQL_ROOT_PASSWORD
-#     files:
-#       - config/mysql/production.cnf:/etc/mysql/my.cnf
-#       - db/production.sql:/docker-entrypoint.sh-initdb.d/setup.sql
-#     directories:
-#       - data:/var/lib/mysql
-#   redis:
-#     image: valkey/valkey:8
-#     host: 192.168.0.2
-#     port: 6379
-#     directories:
-#       - data:/data
+ssh:
+  user: <%= ENV.fetch("KAMAL_SSH_USER") %>
+  key_data:
+    - KAMAL_SSH_PRIVATE_KEY
