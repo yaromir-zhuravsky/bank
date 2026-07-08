@@ -39,9 +39,8 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
       - uses: crazy-max/ghaction-github-runtime@v3
-      - run: bundle exec kamal deploy
+      - run: bundle exec kamal deploy --version "${{ steps.version.outputs.deploy_tag }}-${{ github.sha }}"
         env:
-          KAMAL_VERSION: ${{ steps.version.outputs.deploy_tag }}-${{ github.sha }}
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
           KAMAL_SSH_PRIVATE_KEY: ${{ secrets.KAMAL_SSH_PRIVATE_KEY }}
           SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
