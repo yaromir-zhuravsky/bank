@@ -1,19 +1,19 @@
 service: bank-backend
 
-image: yaromir-zhuravsky/bank-backend
+image: <%= ENV.fetch("KAMAL_IMAGE") %>
 
 servers:
   web:
-    - 204.168.229.11
+    - <%= ENV.fetch("KAMAL_SERVER_IP") %>
 
 proxy:
-  host: api.zhuravsky.dev
+  host: <%= ENV.fetch("KAMAL_HOST") %>
   app_port: 3000
   ssl: true
 
 registry:
-  server: ghcr.io
-  username: yaromir-zhuravsky
+  server: <%= ENV.fetch("KAMAL_REGISTRY_SERVER", "ghcr.io") %>
+  username: <%= ENV.fetch("KAMAL_REGISTRY_USERNAME") %>
   password:
     - KAMAL_REGISTRY_PASSWORD
 
@@ -29,9 +29,6 @@ env:
     - JWT_SECRET
 
 ssh:
-  user: root
+  user: <%= ENV.fetch("KAMAL_SSH_USER") %>
   key_data:
     - KAMAL_SSH_PRIVATE_KEY
-
-aliases:
-  console: app exec -i --reuse "bin/rails console"
