@@ -39,6 +39,10 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
       - uses: crazy-max/ghaction-github-runtime@v3
+      - name: Tag
+        run: |
+          git tag "${{ steps.version.outputs.deploy_tag }}"
+          git push origin "refs/tags/${{ steps.version.outputs.deploy_tag }}"
       - run: bundle exec kamal deploy --version "${{ steps.version.outputs.deploy_tag }}-${{ github.sha }}"
         env:
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -46,7 +50,3 @@ jobs:
           SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           BANK_DATABASE_URL: ${{ secrets.BANK_DATABASE_URL }}
-      - name: Tag
-        run: |
-          git tag "${{ steps.version.outputs.deploy_tag }}"
-          git push origin "refs/tags/${{ steps.version.outputs.deploy_tag }}"
